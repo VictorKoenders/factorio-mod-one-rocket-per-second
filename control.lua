@@ -1,40 +1,35 @@
-require "defines"
-
--- TODO: Give every player that joins a full set of power armor + legs + reactors
--- TODO: middle area, iron, copper, coal and stone in a 4x4
-
 local areas = {
 	-- 3 lanes of copper
 	{
 		left_top = {
-			x = -9494,
-			y = 100
+			x = -10000,
+			y = -650
 		},
 		right_bottom = {
 			x = -100,
-			y = 166
+			y = -550
 		},
 		type = "copper-ore"
 	},
 	{
 		left_top = {
-			x = -9494,
-			y = 300
+			x = -10000,
+			y = -50
 		},
 		right_bottom = {
 			x = -100,
-			y = 366
+			y = 50
 		},
 		type = "copper-ore"
 	},
 	{
 		left_top = {
-			x = -9494,
-			y = 500
+			x = -10000,
+			y = 550
 		},
 		right_bottom = {
 			x = -100,
-			y = 566
+			y = 650
 		},
 		type = "copper-ore"
 	},
@@ -42,23 +37,23 @@ local areas = {
 	-- 2 lanes of iron
 	{
 		left_top = {
-			x = -6530,
-			y = -166
+			x = -10000,
+			y = -350
 		},
 		right_bottom = {
 			x = -100,
-			y = -100
+			y = -250
 		},
 		type = "iron-ore"
 	},
 	{
 		left_top = {
-			x = -6530,
-			y = -366
+			x = -10000,
+			y = 250
 		},
 		right_bottom = {
 			x = -100,
-			y = -300
+			y = 350
 		},
 		type = "iron-ore"
 	},
@@ -67,11 +62,11 @@ local areas = {
 	{
 		left_top = {
 			x = 100,
-			y = -166
+			y = -150
 		},
 		right_bottom = {
 			x = 1482,
-			y = -100
+			y = -50
 		},
 		type = "coal"
 	},
@@ -83,8 +78,8 @@ local areas = {
 			y = 200
 		},
 		right_bottom = {
-			x = 220,
-			y = 10700
+			x = 11350,
+			y = 10000
 		},
 		spacing = {
 			x = 3,
@@ -92,67 +87,67 @@ local areas = {
 		},
 		type = "crude-oil"
 	},
-	
-	{
-		left_top = {
-			x = 500,
-			y = 200
-		},
-		right_bottom = {
-			x = 620,
-			y = 10700
-		},
-		spacing = {
-			x = 3,
-			y = 8
-		},
-		type = "crude-oil"
-	},
-	{
-		left_top = {
-			x = 1000,
-			y = 200
-		},
-		right_bottom = {
-			x = 1120,
-			y = 10700
-		},
-		spacing = {
-			x = 3,
-			y = 8
-		},
-		type = "crude-oil"
-	},
-	{
-		left_top = {
-			x = 1500,
-			y = 200
-		},
-		right_bottom = {
-			x = 1650,
-			y = 10700
-		},
-		spacing = {
-			x = 3,
-			y = 8
-		},
-		type = "crude-oil"
-	},
-	{
-		left_top = {
-			x = 2000,
-			y = 200
-		},
-		right_bottom = {
-			x = 2150,
-			y = 10700
-		},
-		spacing = {
-			x = 3,
-			y = 8
-		},
-		type = "crude-oil"
-	},
+	--
+	--{
+	--	left_top = {
+	--		x = 500,
+	--		y = 200
+	--	},
+	--	right_bottom = {
+	--		x = 620,
+	--		y = 10700
+	--	},
+	--	spacing = {
+	--		x = 3,
+	--		y = 8
+	--	},
+	--	type = "crude-oil"
+	--},
+	--{
+	--	left_top = {
+	--		x = 1000,
+	--		y = 200
+	--	},
+	--	right_bottom = {
+	--		x = 1120,
+	--		y = 10700
+	--	},
+	--	spacing = {
+	--		x = 3,
+	--		y = 8
+	--	},
+	--	type = "crude-oil"
+	--},
+	--{
+	--	left_top = {
+	--		x = 1500,
+	--		y = 200
+	--	},
+	--	right_bottom = {
+	--		x = 1650,
+	--		y = 10700
+	--	},
+	--	spacing = {
+	--		x = 3,
+	--		y = 8
+	--	},
+	--	type = "crude-oil"
+	--},
+	--{
+	--	left_top = {
+	--		x = 2000,
+	--		y = 200
+	--	},
+	--	right_bottom = {
+	--		x = 2150,
+	--		y = 10700
+	--	},
+	--	spacing = {
+	--		x = 3,
+	--		y = 8
+	--	},
+	--	type = "crude-oil"
+	--},
 	
 	-- little bit of stone for making furnaces etc
 	{
@@ -295,7 +290,7 @@ end
 script.on_event(defines.events.on_player_created, function(event)
 	local player = game.players[event.player_index];
 	player.insert{ name = "personal-roboport-equipment", count = 5 };
-	player.insert{ name = "basic-exoskeleton-equipment", count = 4 };
+	player.insert{ name = "exoskeleton-equipment", count = 4 };
 	player.insert{ name = "fusion-reactor-equipment", count = 3 };
 	player.insert{ name = "deconstruction-planner", count = 1 };
 	player.insert{ name = "night-vision-equipment", count = 1 };
@@ -339,7 +334,7 @@ script.on_event(defines.events.on_chunk_generated, function(event)
 	for _, ent in pairs(entitiesToAdd) do
 		local amount = 2147483647;
 		if ent.type == "crude-oil" then
-			amount = 400
+			amount = 750
 		end
 		
 		if ent.type == "alien-artifact" then
