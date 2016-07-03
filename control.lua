@@ -187,60 +187,60 @@ local areas = {
 		},
 		type = "tree"
 	},
-	
+
 	-- starter patch in the middle
 	{
 		left_top = {
-			x = -6,
-			y = -10
+			x = -60,
+			y = -100
 		},
 		right_bottom = {
-			x = -3,
-			y = -3
+			x = -30,
+			y = -30
 		},
 		type = "iron-ore"
 	},
 	{
 		left_top = {
-			x = 3,
-			y = -6
+			x = 30,
+			y = -60
 		},
 		right_bottom = {
-			x = 6,
-			y = -3
+			x = 60,
+			y = -30
 		},
 		type = "coal"
 	},
 	{
 		left_top = {
-			x = -6,
-			y = 3
+			x = -60,
+			y = 30
 		},
 		right_bottom = {
-			x = -3,
-			y = 6
+			x = -30,
+			y = 60
 		},
 		type = "copper-ore"
 	},
 	{
 		left_top = {
-			x = 3,
-			y = 3
+			x = 30,
+			y = 30
 		},
 		right_bottom = {
-			x = 4,
-			y = 4
+			x = 40,
+			y = 40
 		},
 		type = "stone"
 	},
 	{
 		left_top = {
-			x = -5,
-			y = 0
+			x = -50,
+			y = 00
 		},
 		right_bottom = {
-			x = -4,
-			y = 1
+			x = -40,
+			y = 10
 		},
 		type = "tree"
 	}
