@@ -187,60 +187,60 @@ local areas = {
 		},
 		type = "tree"
 	},
-	
+
 	-- starter patch in the middle
 	{
 		left_top = {
-			x = -6,
-			y = -10
+			x = -60,
+			y = -100
 		},
 		right_bottom = {
-			x = -3,
-			y = -3
+			x = -30,
+			y = -30
 		},
 		type = "iron-ore"
 	},
 	{
 		left_top = {
-			x = 3,
-			y = -6
+			x = 30,
+			y = -60
 		},
 		right_bottom = {
-			x = 6,
-			y = -3
+			x = 60,
+			y = -30
 		},
 		type = "coal"
 	},
 	{
 		left_top = {
-			x = -6,
-			y = 3
+			x = -60,
+			y = 30
 		},
 		right_bottom = {
-			x = -3,
-			y = 6
+			x = -30,
+			y = 60
 		},
 		type = "copper-ore"
 	},
 	{
 		left_top = {
-			x = 3,
-			y = 3
+			x = 30,
+			y = 30
 		},
 		right_bottom = {
-			x = 4,
-			y = 4
+			x = 40,
+			y = 40
 		},
 		type = "stone"
 	},
 	{
 		left_top = {
-			x = -5,
-			y = 0
+			x = -50,
+			y = 00
 		},
 		right_bottom = {
-			x = -4,
-			y = 1
+			x = -40,
+			y = 10
 		},
 		type = "tree"
 	}
@@ -307,36 +307,36 @@ script.on_event(defines.events.on_chunk_generated, function(event)
 	while x <= event.area.right_bottom.x + 1 do
 		local y = event.area.left_top.y - 1;
 		while y <= event.area.right_bottom.y + 1 do
-			local name = "grass";
+			local name = "concrete";
 			if isWaterAt({ x = x, y = y }) then name = "water" end
 			table.insert(tiles, { name = name, position = { x = x, y = y } });
-			
+
 			local type = getTypeAt({ x = x, y = y });
 			if type ~= nil then
 				table.insert(entitiesToAdd, { type = type, x = x, y = y });
 			end
-			
+
 			y = y + 1;
 		end
-		
+
 		x = x + 1;
 	end
 	event.surface.set_tiles(tiles);
-	
+
 	local entities = event.surface.find_entities(event.area)
 	for _, ent in pairs(entities) do
 		local foundEntity = getTypeAt(ent.position);
-		if ent.type ~= "player" and (foundEntity == nil or ent.type ~= foundEntity.type) then 
+		if ent.type ~= "player" and (foundEntity == nil or ent.type ~= foundEntity.type) then
 			ent.destroy();
 		end
 	end
-	
+
 	for _, ent in pairs(entitiesToAdd) do
 		local amount = 2147483647;
 		if ent.type == "crude-oil" then
 			amount = 750
 		end
-		
+
 		if ent.type == "alien-artifact" then
 			local chest = event.surface.create_entity {
 				name = "steel-chest",
