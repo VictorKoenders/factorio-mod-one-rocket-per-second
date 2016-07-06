@@ -69,7 +69,13 @@ function fill_chunk(surface, area)
 	for i = 1, #entities do
 		local ent = entities[i]
 		if ent.type ~= "player" then
-			ent.destroy();
+			local pos = ent.position
+			if pos.x >= area.left_top.x and
+				 pos.x < area.right_bottom.x and
+				 pos.y >= area.left_top.y and
+				 pos.y < area.right_bottom.y then
+				ent.destroy();
+			end
 		end
 	end
 	
