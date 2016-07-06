@@ -178,16 +178,15 @@ local areas = {
 	-- and some wood to get started
 	{
 		left_top = {
-			x = -50,
+			x = -20,
 			y = -50,
 		},
 		right_bottom = {
-			x = -30,
+			x = 0,
 			y = -30
 		},
 		type = "tree"
 	},
-
 	-- starter patch in the middle
 	{
 		left_top = {
@@ -246,6 +245,7 @@ local areas = {
 	}
 };
 
+-- Move this into a terrain table, so we can declare multiple areas of water.
 local water = {
 	left_top = {
 		x = 100,
@@ -257,22 +257,21 @@ local water = {
 	}
 }
 
-function pointIsInArea(point, area)
-	return area.left_top.x <= point.x
-	   and area.left_top.y <= point.y
-	   and area.right_bottom.x >= point.x
-	   and area.right_bottom.y >= point.y
+local function within_area(pos, area)
+	return area.left_top.x <= pos.x and area.left_top.y <= pos.y and pos.x < area.right_bottom.x and pos.y < area.right_bottom.y;
 end
 
-function getTypeAt(position)
-	for _, area in pairs(areas) do
-		if pointIsInArea(position, area) then
-			if not area.spacing 
-				or (
-					(position.x - area.left_top.x) % area.spacing.x == 0
-					and (position.y - area.left_top.y) % area.spacing.y == 0
-				)
-			then
+local function spaced(pos, area)
+	return (pos.x - area.left_top.x) % area.spacing.x == 0 and (pos.y - area.left_top.y) % area.spacing.y == 0;
+end
+
+local function type_at(pos)
+	local areas = areas;
+	for i = 1, #areas do
+		local area = areas[i]
+		if within_area(pos, area) then
+			if not area.spacing or spaced(pos, area) then
+				-- Check for a function under a similiar name that we can call so it can generate types instead of this edge case here.
 				if area.type == "tree" then
 					return area.type .. "-" .. string.format("%02d", math.random(1, 9));
 				end
@@ -283,11 +282,86 @@ function getTypeAt(position)
 	return nil;
 end
 
-function isWaterAt(position)
-	return pointIsInArea(position, water);
+local function is_water(pos)
+	return within_area(pos, water);
 end
 
-script.on_event(defines.events.on_player_created, function(event)
+local function on_chunk_generated(event)
+	local terrain = {};
+	local terrain_l = 1;
+	local entities_to_add = {};
+	local entities_to_add_l = 1;
+	
+	local area = event.area;
+	local surface = event.surface;
+	
+	local x = area.left_top.x;
+	local max_x = area.right_bottom.x;
+	
+	local _y = area.left_top.y;
+	local max_y = area.right_bottom.y;
+	
+	while x < max_x do
+		local y = _y;
+		while y < max_y do
+			local name = "concrete";
+			local pos = { x = x, y = y };
+			if is_water(pos) then
+				name = "water"
+			end
+			terrain[terrain_l] = { name = name, position = pos };
+			terrain_l = terrain_l + 1
+			
+			local found_type = type_at(pos);
+			if found_type then
+				-- TODO Change this so each section can control its own generation more specifically, such as the alien artefacts.
+				entities_to_add[entities_to_add_l] =  { type = found_type, pos = pos }
+				entities_to_add_l = entities_to_add_l + 1
+			end
+			
+			y = y + 1;
+		end
+		
+		x = x + 1;
+	end
+	
+	surface.set_tiles(terrain);
+	
+	local entities = surface.find_entities(area)
+	for i = 1, #entities do
+		local ent = entities[i]
+		if ent.type ~= "player" then
+			ent.destroy();
+		end
+	end
+	
+	
+	local create_entity = surface.create_entity;
+	for i = 1, #entities_to_add do
+		local ent = entities_to_add[i];
+		-- As stated above, I want to move this over into the area, so we can generate specific stuff, and not have edge cases here.
+		if ent.type == "alien-artifact" then
+			local chest = create_entity {
+				name = "steel-chest",
+				force = "player",
+				position = ent.pos
+			}
+			chest.insert { name = "alien-artifact", count = 24000 }
+		else
+			local amount = 2147483647;
+			if ent.type == "crude-oil" then
+				amount = 750
+			end
+			create_entity {
+				name = ent.type,
+				position = ent.pos,
+				amount = amount
+			}
+		end
+	end
+end
+
+local function on_player_created(event)
 	local player = game.players[event.player_index];
 	player.insert{ name = "personal-roboport-equipment", count = 5 };
 	player.insert{ name = "exoskeleton-equipment", count = 4 };
@@ -298,58 +372,15 @@ script.on_event(defines.events.on_player_created, function(event)
 	player.insert{ name = "power-armor-mk2", count = 1 };
 	player.insert{ name = "blueprint", count = 10 };
 	player.insert{ name = "steel-axe", count = 5 };
-end)
+end
 
-script.on_event(defines.events.on_chunk_generated, function(event)
-	local tiles = {};
-	local entitiesToAdd = {};
-	local x = event.area.left_top.x  - 1;
-	while x <= event.area.right_bottom.x + 1 do
-		local y = event.area.left_top.y - 1;
-		while y <= event.area.right_bottom.y + 1 do
-			local name = "concrete";
-			if isWaterAt({ x = x, y = y }) then name = "water" end
-			table.insert(tiles, { name = name, position = { x = x, y = y } });
+function pos_str(pos)
+  return string.format("[%g, %g]", pos.x, pos.y)
+end
 
-			local type = getTypeAt({ x = x, y = y });
-			if type ~= nil then
-				table.insert(entitiesToAdd, { type = type, x = x, y = y });
-			end
+function area_str(area)
+  return string.format("[%g, %g] -> [%g, %g]", area.left_top.x, area.left_top.y, area.right_bottom.x, area.right_bottom.y)
+end
 
-			y = y + 1;
-		end
-
-		x = x + 1;
-	end
-	event.surface.set_tiles(tiles);
-
-	local entities = event.surface.find_entities(event.area)
-	for _, ent in pairs(entities) do
-		local foundEntity = getTypeAt(ent.position);
-		if ent.type ~= "player" and (foundEntity == nil or ent.type ~= foundEntity.type) then
-			ent.destroy();
-		end
-	end
-
-	for _, ent in pairs(entitiesToAdd) do
-		local amount = 2147483647;
-		if ent.type == "crude-oil" then
-			amount = 750
-		end
-
-		if ent.type == "alien-artifact" then
-			local chest = event.surface.create_entity {
-				name = "steel-chest",
-				force = "player",
-				position = { x = ent.x, y = ent.y }
-			}
-			chest.insert { name = "alien-artifact", count = 24000 }
-		else
-			event.surface.create_entity {
-				name = ent.type,
-				position = { x = ent.x, y = ent.y },
-				amount = amount
-			}
-		end
-	end
-end)
+script.on_event(defines.events.on_player_created, on_player_created)
+script.on_event(defines.events.on_chunk_generated, on_chunk_generated)
