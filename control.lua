@@ -1,3 +1,10 @@
+require "story"
+
+local chunks_to_generate = {};
+local chunks_to_generate_count = 0;
+local flooring_to_place = "";
+
+
 local areas = {
 	-- 3 lanes of copper
 	{
@@ -286,14 +293,11 @@ local function is_water(pos)
 	return within_area(pos, water);
 end
 
-local function on_chunk_generated(event)
+local function fill_chunk(surface, area)
 	local terrain = {};
 	local terrain_l = 1;
 	local entities_to_add = {};
 	local entities_to_add_l = 1;
-	
-	local area = event.area;
-	local surface = event.surface;
 	
 	local x = area.left_top.x;
 	local max_x = area.right_bottom.x;
@@ -361,8 +365,31 @@ local function on_chunk_generated(event)
 	end
 end
 
+local function generate_chunk_on_tick()
+	local chunk = chunks_to_generate[chunks_to_generate_count];
+	chunks_to_generate_count = chunks_to_generate_count - 1;
+	
+	fill_chunk(chunk.surface, chunk.area);
+	
+	if chunks_to_generate_count == 0 then 
+		script.on_event(defines.events.on_tick, nil)
+	end
+end
+
+local function on_chunk_generated(event)
+	if flooring_to_place == "" then 
+		chunks_to_generate_count = chunks_to_generate_count + 1;
+		chunks_to_generate[chunks_to_generate_count] = { surface = event.surface, area = event.area };
+		return;
+	else 
+		fill_chunk(event.surface, event.area);
+	end
+end
+
 local function on_player_created(event)
 	local player = game.players[event.player_index];
+	
+	player.clear_items_inside()
 	player.insert{ name = "personal-roboport-equipment", count = 5 };
 	player.insert{ name = "exoskeleton-equipment", count = 4 };
 	player.insert{ name = "fusion-reactor-equipment", count = 3 };
@@ -372,6 +399,12 @@ local function on_player_created(event)
 	player.insert{ name = "power-armor-mk2", count = 1 };
 	player.insert{ name = "blueprint", count = 10 };
 	player.insert{ name = "steel-axe", count = 5 };
+	
+	player.insert{ name = "steam-engine", count = 10 };
+	player.insert{ name = "boiler", count = 14 };
+	player.insert{ name = "pipe-to-ground", count = 4 };
+	player.insert{ name = "small-pump", count = 1 };
+	player.insert{ name = "small-electric-pole", count = 100 };
 end
 
 function pos_str(pos)
@@ -382,5 +415,90 @@ function area_str(area)
   return string.format("[%g, %g] -> [%g, %g]", area.left_top.x, area.left_top.y, area.right_bottom.x, area.right_bottom.y)
 end
 
+story_table = {{
+	{
+		action = function()
+			game.show_message_dialog{text = {"msg-ask-flooring"}};
+		end
+	},
+	{
+		action = function()
+			local player = game.players[1];
+			if player ~= nil then
+				player.gui.top.add{type = "button", name="button_flooring_grass", caption={"flooring-grass"}};
+				player.gui.top.add{type = "button", name="button_flooring_concrete", caption={"flooring-concrete"}};
+			end
+		end
+	},
+	{
+		condition = function(event)
+			if event.name == defines.events.on_gui_click then
+				if event.element.name == "button_flooring_grass" then
+					flooring_to_place = "grass";
+					return true;
+				end
+				if event.element.name == "button_flooring_concrete" then
+					flooring_to_place = "concrete";
+					return true;
+				end
+			end
+		end,
+		action = function()
+			local player = game.players[1];
+			player.gui.top.button_flooring_grass.destroy();
+			player.gui.top.button_flooring_concrete.destroy();
+			
+			script.on_event(defines.events.on_tick, generate_chunk_on_tick);
+			game.show_message_dialog{text = {"msg-ask-technologies"}}
+			
+			player.gui.top.add{type = "button", name = "button_technologies_researched", caption = {"button-technologies-researched"}}
+			player.gui.top.add{type = "button", name = "button_technologies_normal", caption = {"button-technologies-normal"}}
+		end
+	},
+	{
+		condition = function(event)
+			if event.name == defines.events.on_gui_click then
+				local player = game.players[event.player_index]
+				if event.element.name == "button_technologies_researched" then
+					player.force.research_all_technologies()
+				elseif event.element.name ~= "button_technologies_normal" then
+					return false
+				end
+				player.gui.top.button_technologies_researched.destroy()
+				player.gui.top.button_technologies_normal.destroy()
+				return true
+			end
+			return false
+		end,
+		action = function()
+			script.on_event(defines.events, nil);
+			subscribe_events();
+		end
+	},
+	{
+		condition = function() return false end,
+		action = function() end
+	}
+}};
+
+story_init_helpers(story_table);
+
+script.on_event(defines.events, function(event)
+	story_update(global.story, event, "")
+end)
+
+script.on_init(function()
+	global.story = story_init()
+end)
+
 script.on_event(defines.events.on_player_created, on_player_created)
 script.on_event(defines.events.on_chunk_generated, on_chunk_generated)
+
+function subscribe_events()
+	script.on_event(defines.events.on_player_created, on_player_created)
+	script.on_event(defines.events.on_chunk_generated, on_chunk_generated)
+	
+	if chunks_to_generate_count > 0 then
+		script.on_event(defines.events.on_tick, generate_chunk_on_tick);
+	end
+end
