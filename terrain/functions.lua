@@ -1,3 +1,6 @@
+chunks_to_generate = {};
+chunks_to_generate_count = 0;
+
 function within_area(pos, area)
 	return area.left_top.x <= pos.x and area.left_top.y <= pos.y and pos.x < area.right_bottom.x and pos.y < area.right_bottom.y;
 end
@@ -6,21 +9,19 @@ function spaced(pos, area)
 	return (pos.x - area.left_top.x) % area.spacing.x == 0 and (pos.y - area.left_top.y) % area.spacing.y == 0;
 end
 
-function type_at(pos)
+function types_at(pos)
+	local types;
 	local areas = areas;
 	for i = 1, #areas do
 		local area = areas[i]
 		if within_area(pos, area) then
 			if not area.spacing or spaced(pos, area) then
-				-- Check for a function under a similiar name that we can call so it can generate types instead of this edge case here.
-				if area.type == "tree" then
-					return area.type .. "-" .. string.format("%02d", math.random(1, 9));
-				end
-				return area.type
+				types = types or {}
+				types[#types + 1] = area.gen_type and area.gen_type() or area.type;
 			end
 		end
 	end
-	return nil;
+	return types;
 end
 
 function is_water(pos)
@@ -32,44 +33,47 @@ function fill_chunk(surface, area)
 	local terrain_l = 1;
 	local entities_to_add = {};
 	local entities_to_add_l = 1;
-	
+
 	local x = area.left_top.x;
 	local max_x = area.right_bottom.x;
-	
+
 	local _y = area.left_top.y;
 	local max_y = area.right_bottom.y;
-	
+
 	while x < max_x do
 		local y = _y;
 		while y < max_y do
-			local name = flooring_to_place;
+			local name = options.flooring;
 			local pos = { x = x, y = y };
 			if is_water(pos) then
 				name = "water"
 			end
 			terrain[terrain_l] = { name = name, position = pos };
 			terrain_l = terrain_l + 1
-			
-			local found_type = type_at(pos);
-			if found_type then
+
+			local found_types = types_at(pos);
+			if found_types then
+				if (#found_types > 1) then
+					log('Invalid shit');
+				end
 				-- TODO Change this so each section can control its own generation more specifically, such as the alien artefacts.
-				entities_to_add[entities_to_add_l] =  { type = found_type, pos = pos }
+				entities_to_add[entities_to_add_l] = { type = found_types[1], pos = pos }
 				entities_to_add_l = entities_to_add_l + 1
 			end
-			
+
 			y = y + 1;
 		end
-		
+
 		x = x + 1;
 	end
-	
+
 	surface.set_tiles(terrain);
-	
+
 	local entities = surface.find_entities(area)
 	for i = 1, #entities do
 		local ent = entities[i]
 		if ent.type ~= "player" then
-			local pos = ent.position
+			local pos = ent.position;
 			if pos.x >= area.left_top.x and
 				 pos.x < area.right_bottom.x and
 				 pos.y >= area.left_top.y and
@@ -78,8 +82,7 @@ function fill_chunk(surface, area)
 			end
 		end
 	end
-	
-	
+
 	local create_entity = surface.create_entity;
 	for i = 1, #entities_to_add do
 		local ent = entities_to_add[i];
@@ -108,20 +111,22 @@ end
 function generate_chunk_on_tick()
 	local chunk = chunks_to_generate[chunks_to_generate_count];
 	chunks_to_generate_count = chunks_to_generate_count - 1;
-	
+
 	fill_chunk(chunk.surface, chunk.area);
-	
-	if chunks_to_generate_count == 0 then 
+
+	if chunks_to_generate_count == 0 then
 		script.on_event(defines.events.on_tick, nil)
 	end
 end
 
 function on_chunk_generated(event)
-	if flooring_to_place == "" then 
+	if not options.flooring then
 		chunks_to_generate_count = chunks_to_generate_count + 1;
 		chunks_to_generate[chunks_to_generate_count] = { surface = event.surface, area = event.area };
 		return;
-	else 
+	else
 		fill_chunk(event.surface, event.area);
 	end
 end
+
+script.on_event(defines.events.on_chunk_generated, on_chunk_generated);

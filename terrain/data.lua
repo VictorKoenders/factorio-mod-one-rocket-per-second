@@ -33,7 +33,7 @@ areas = {
 		},
 		type = "copper-ore"
 	},
-	
+
 	-- 2 lanes of iron
 	{
 		left_top = {
@@ -57,7 +57,7 @@ areas = {
 		},
 		type = "iron-ore"
 	},
-	
+
 	-- 1 lane of coal
 	{
 		left_top = {
@@ -70,7 +70,7 @@ areas = {
 		},
 		type = "coal"
 	},
-	
+
 	-- a LOT of crude oil
 	{
 		left_top = {
@@ -148,7 +148,7 @@ areas = {
 	--	},
 	--	type = "crude-oil"
 	--},
-	
+
 	-- little bit of stone for making furnaces etc
 	{
 		left_top = {
@@ -161,7 +161,7 @@ areas = {
 		},
 		type = "stone"
 	},
-	
+
 	-- chests for alien artifacts
 	{
 		left_top = {
@@ -174,7 +174,7 @@ areas = {
 		},
 		type = "alien-artifact"
 	},
-	
+
 	-- and some wood to get started
 	{
 		left_top = {
@@ -185,7 +185,9 @@ areas = {
 			x = 0,
 			y = -30
 		},
-		type = "tree"
+		gen_type = function()
+			return "tree-" .. string.format("%02d", math.random(1, 9));
+		end
 	},
 	-- starter patch in the middle
 	{
@@ -241,7 +243,9 @@ areas = {
 			x = -40,
 			y = 10
 		},
-		type = "tree"
+		gen_type = function()
+			return "tree-" .. string.format("%02d", math.random(1, 9));
+		end
 	}
 };
 
@@ -256,4 +260,3 @@ water = {
 		y = 102
 	}
 };
-
