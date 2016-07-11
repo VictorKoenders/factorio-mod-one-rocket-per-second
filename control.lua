@@ -1,4 +1,4 @@
-require("options")
+options = require("options")
 
 require("terrain.data")
 require("terrain.functions")
@@ -12,14 +12,19 @@ end
 local function on_player_created(event)
 	local player = game.players[event.player_index];
 
-	player.clear_items_inside()
-	player.insert{ name = "personal-roboport-equipment", count = 5 };
-	player.insert{ name = "exoskeleton-equipment", count = 4 };
+	player.clear_items_inside();
+
+	player.insert{ name = "power-armor-mk2", count = 1 };
+
 	player.insert{ name = "fusion-reactor-equipment", count = 3 };
-	player.insert{ name = "deconstruction-planner", count = 1 };
+	player.insert{ name = "exoskeleton-equipment", count = 4 };
+	player.insert{ name = "personal-roboport-equipment", count = 5 };
+
 	player.insert{ name = "night-vision-equipment", count = 1 };
 	player.insert{ name = "construction-robot", count = 50 };
-	player.insert{ name = "power-armor-mk2", count = 1 };
+
+	player.insert{ name = "deconstruction-planner", count = 1 };
+	player.insert{ name = "blueprint-book", count = 1 };
 	player.insert{ name = "blueprint", count = 10 };
 	player.insert{ name = "steel-axe", count = 5 };
 
@@ -33,8 +38,8 @@ local function on_player_created(event)
 	player.insert{ name = "stone-furnace", count = 50 };
 	player.insert{ name = "transport-belt", count = 200 };
 	player.insert{ name = "inserter", count = 50 };
-	
-	options.start(player)
+
+	options.start(player);
 end
 script.on_event(defines.events.on_player_created, on_player_created);
 

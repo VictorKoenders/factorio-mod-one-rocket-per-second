@@ -1,5 +1,5 @@
 -- The configurable stuff for people to choose from.
-options = {
+local options = {
 	{
 		key = "flooring",
 		buttons = {
@@ -88,3 +88,5 @@ local function on_gui_click(event)
 end
 
 script.on_event(defines.events.on_gui_click, on_gui_click);
+
+return options;

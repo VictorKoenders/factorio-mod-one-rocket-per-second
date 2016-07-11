@@ -67,7 +67,7 @@ function fill_chunk(surface, area)
 		x = x + 1;
 	end
 
-	surface.set_tiles(terrain);
+	surface.set_tiles(terrain, false);
 
 	local entities = surface.find_entities(area)
 	for i = 1, #entities do
