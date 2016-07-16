@@ -79,7 +79,11 @@ local function on_gui_click(event)
 			name = active.option.action(player,name);
 		end
 		if name then
-			options[active.option.key] = name;
+			if options.add then
+				options.add(active.option.key, name)
+			else
+				options[active.option.key] = name;
+			end
 		end
 		next_option = next_option + 1;
 		active.options_frame.destroy();

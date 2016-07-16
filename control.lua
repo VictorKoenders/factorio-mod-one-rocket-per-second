@@ -1,13 +1,19 @@
-global = {}
-global.options = require("options")
+global = global or {}
+global.options = global.options or {}
+
+options = require("options")
 
 require("terrain.data")
 require("terrain.functions")
 
-function global.options.on_complete()
+function options.on_complete()
 	if chunks_to_generate_count > 0 then
 		script.on_event(defines.events.on_tick, generate_chunk_on_tick);
 	end
+end
+
+function options.add(key, value)
+	global.options[key] = value;
 end
 
 local function on_player_created(event)
@@ -40,7 +46,7 @@ local function on_player_created(event)
 	player.insert{ name = "transport-belt", count = 200 };
 	player.insert{ name = "inserter", count = 50 };
 
-	global.options.start(player);
+	options.start(player);
 end
 script.on_event(defines.events.on_player_created, on_player_created);
 
