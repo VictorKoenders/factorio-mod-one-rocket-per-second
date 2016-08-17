@@ -48,7 +48,7 @@ function fill_chunk(surface, area)
 	while x < max_x do
 		local y = _y;
 		while y < max_y do
-			local name = options.flooring;
+			local name = global.options.flooring;
 			local pos = { x = x, y = y };
 			if is_water(pos) then
 				name = "water"
@@ -129,7 +129,7 @@ end
 
 function on_chunk_generated(event)
 	if event.surface.index ~= 1 then return end
-	if not options.flooring then
+	if not global.options.flooring then
 		chunks_to_generate_count = chunks_to_generate_count + 1;
 		chunks_to_generate[chunks_to_generate_count] = { surface = event.surface, area = event.area };
 		return;

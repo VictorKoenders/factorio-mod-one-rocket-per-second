@@ -1,5 +1,5 @@
 -- The configurable stuff for people to choose from.
-options = {
+local options = {
 	{
 		key = "flooring",
 		buttons = {
@@ -79,7 +79,11 @@ local function on_gui_click(event)
 			name = active.option.action(player,name);
 		end
 		if name then
-			options[active.option.key] = name;
+			if options.add then
+				options.add(active.option.key, name)
+			else
+				options[active.option.key] = name;
+			end
 		end
 		next_option = next_option + 1;
 		active.options_frame.destroy();
@@ -88,3 +92,5 @@ local function on_gui_click(event)
 end
 
 script.on_event(defines.events.on_gui_click, on_gui_click);
+
+return options;
