@@ -11,13 +11,18 @@ end
 
 function types_at(pos)
 	local types;
-	local areas = areas;
-	for i = 1, #areas do
-		local area = areas[i]
-		if within_area(pos, area) then
-			if not area.spacing or spaced(pos, area) then
-				types = types or {}
-				types[#types + 1] = area.gen_type and area.gen_type() or area.type;
+	for j = 1, 2 do
+		local areas;
+		if j == 1 then areas = left_areas
+		else areas = right_areas end
+		
+		for i = 1, #areas do
+			local area = areas[i]
+			if within_area(pos, area) then
+				if not area.spacing or spaced(pos, area) then
+					types = types or {}
+					types[#types + 1] = area.gen_type and area.gen_type() or area.type;
+				end
 			end
 		end
 	end
@@ -67,7 +72,7 @@ function fill_chunk(surface, area)
 		x = x + 1;
 	end
 
-	surface.set_tiles(terrain);
+	surface.set_tiles(terrain, false);
 
 	local entities = surface.find_entities(area)
 	for i = 1, #entities do
@@ -116,10 +121,14 @@ function generate_chunk_on_tick()
 
 	if chunks_to_generate_count == 0 then
 		script.on_event(defines.events.on_tick, nil)
+		for i = 1, #game.players do 
+			game.players[i].force.rechart()
+		end
 	end
 end
 
 function on_chunk_generated(event)
+	if event.surface.index ~= 1 then return end
 	if not options.flooring then
 		chunks_to_generate_count = chunks_to_generate_count + 1;
 		chunks_to_generate[chunks_to_generate_count] = { surface = event.surface, area = event.area };

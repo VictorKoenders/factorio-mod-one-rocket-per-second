@@ -1,63 +1,56 @@
-areas = {
+local terrain_lane_height = 198;
+local terrain_lane_spacing = 500;
+
+-- left areas are alternating lanes of copper and iron
+left_areas = {
+	{
+		type = "copper-ore"
+	},
+	{
+		type = "iron-ore"
+	},
+	{
+		type = "copper-ore"
+	},
+	{
+		type = "iron-ore"
+	},
+	{
+		type = "copper-ore"
+	},
+};
+
+remote.add_interface("test", {
+	left_areas = function() 
+		local print = game.player.print;
+		for i = 1, #left_areas do
+			local area = left_areas[i];
+			print(area.type .. " from " .. area.left_top.x .. "/" .. area.left_top.y .. " to " .. area.right_bottom.x .. "/" .. area.right_bottom.y);
+		end
+	end
+});
+
+-- calculate the position of the copper and iron lanes
+local top = #left_areas * terrain_lane_height + (#left_areas - 1) * terrain_lane_spacing;
+top = -(top / 2)
+
+for i = 1, #left_areas do
+	local area = left_areas[i]
+	area.left_top = {
+		x = -10000,
+		y = top
+	};
+	area.right_bottom = {
+		x = -100,
+		y = top + terrain_lane_height
+	};
+	
+	top = top + terrain_lane_height + terrain_lane_spacing
+end
+
+right_areas = {
 	-- 3 lanes of copper
-	{
-		left_top = {
-			x = -10000,
-			y = -650
-		},
-		right_bottom = {
-			x = -100,
-			y = -550
-		},
-		type = "copper-ore"
-	},
-	{
-		left_top = {
-			x = -10000,
-			y = -50
-		},
-		right_bottom = {
-			x = -100,
-			y = 50
-		},
-		type = "copper-ore"
-	},
-	{
-		left_top = {
-			x = -10000,
-			y = 550
-		},
-		right_bottom = {
-			x = -100,
-			y = 650
-		},
-		type = "copper-ore"
-	},
-
-	-- 2 lanes of iron
-	{
-		left_top = {
-			x = -10000,
-			y = -350
-		},
-		right_bottom = {
-			x = -100,
-			y = -250
-		},
-		type = "iron-ore"
-	},
-	{
-		left_top = {
-			x = -10000,
-			y = 250
-		},
-		right_bottom = {
-			x = -100,
-			y = 350
-		},
-		type = "iron-ore"
-	},
-
+	
 	-- 1 lane of coal
 	{
 		left_top = {
@@ -87,67 +80,6 @@ areas = {
 		},
 		type = "crude-oil"
 	},
-	--
-	--{
-	--	left_top = {
-	--		x = 500,
-	--		y = 200
-	--	},
-	--	right_bottom = {
-	--		x = 620,
-	--		y = 10700
-	--	},
-	--	spacing = {
-	--		x = 3,
-	--		y = 8
-	--	},
-	--	type = "crude-oil"
-	--},
-	--{
-	--	left_top = {
-	--		x = 1000,
-	--		y = 200
-	--	},
-	--	right_bottom = {
-	--		x = 1120,
-	--		y = 10700
-	--	},
-	--	spacing = {
-	--		x = 3,
-	--		y = 8
-	--	},
-	--	type = "crude-oil"
-	--},
-	--{
-	--	left_top = {
-	--		x = 1500,
-	--		y = 200
-	--	},
-	--	right_bottom = {
-	--		x = 1650,
-	--		y = 10700
-	--	},
-	--	spacing = {
-	--		x = 3,
-	--		y = 8
-	--	},
-	--	type = "crude-oil"
-	--},
-	--{
-	--	left_top = {
-	--		x = 2000,
-	--		y = 200
-	--	},
-	--	right_bottom = {
-	--		x = 2150,
-	--		y = 10700
-	--	},
-	--	spacing = {
-	--		x = 3,
-	--		y = 8
-	--	},
-	--	type = "crude-oil"
-	--},
 
 	-- little bit of stone for making furnaces etc
 	{
