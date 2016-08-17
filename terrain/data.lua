@@ -20,16 +20,6 @@ left_areas = {
 	},
 };
 
-remote.add_interface("test", {
-	left_areas = function() 
-		local print = game.player.print;
-		for i = 1, #left_areas do
-			local area = left_areas[i];
-			print(area.type .. " from " .. area.left_top.x .. "/" .. area.left_top.y .. " to " .. area.right_bottom.x .. "/" .. area.right_bottom.y);
-		end
-	end
-});
-
 -- calculate the position of the copper and iron lanes
 local top = #left_areas * terrain_lane_height + (#left_areas - 1) * terrain_lane_spacing;
 top = -(top / 2)

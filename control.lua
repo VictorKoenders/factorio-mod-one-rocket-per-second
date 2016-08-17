@@ -21,6 +21,7 @@ local function on_player_created(event)
 	player.insert{ name = "construction-robot", count = 50 };
 	player.insert{ name = "power-armor-mk2", count = 1 };
 	player.insert{ name = "blueprint", count = 10 };
+	player.insert{ name = "blueprint-book", count = 1 };
 	player.insert{ name = "steel-axe", count = 5 };
 
 	player.insert{ name = "steam-engine", count = 10 };
